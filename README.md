@@ -1,6 +1,6 @@
 # Myplotlib API
 
-Simple API.
+Simple API using python Flask and Google Cloud App Engine. 
 
 ## Service
 
@@ -10,8 +10,7 @@ The API is available at: https://myplotlib-api.appspot.com
 
 * https://myplotlib-api.appspot.com/scatter?x=0,1,2,3,4,5&y=0,4,1,2,3,5
 * https://myplotlib-api.appspot.com/barplot?labels=A,B,C&values=3,4,2
-* https://myplotlib-api.appspot.com/histogram?x=1,1,1,2,2,3,3,3,3,4,4,4,4,4,5,5,5,6,6
-* https://myplotlib-api.appspot.com/function?func=x^2&from=-10&to=10
+* https://myplotlib-api.appspot.com/function?func=x^2&start=-10&end=10
 
 ## Usage
 
