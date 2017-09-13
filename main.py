@@ -1,6 +1,5 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, make_response
 import numpy as np
-
 
 import settings
 import util
@@ -27,6 +26,7 @@ def sum_list():
 
 @app.route('/scatter', methods=['GET'])
 def scatter():
+
     x_string = request.args.get('x')
     y_string = request.args.get('y')
     xlabel = request.args.get('xlabel')
@@ -39,7 +39,9 @@ def scatter():
         return 'Nothing to do here.'
     if len(x_vals) != len(y_vals):
         return 'Nothing to do here.'
-    response = util.scatter_plot(x_vals, y_vals, xlabel, ylabel, title)
+
+    response = make_response(util.scatter_plot(x_vals, y_vals, xlabel, ylabel, title))
+    response.mimetype = 'image/png'
     return response
 
 
@@ -57,10 +59,12 @@ def barplot():
         return 'Nothing to do here.'
     if len(labels) != len(values):
         return 'Nothing to do here.'
-    response = util.bar_plot(labels, values, xlabel, ylabel, title)
+    response = make_response(util.bar_plot(labels, values, xlabel, ylabel, title))
+    response.mimetype = 'image/png'
     return response
 
-"""
+
+
 @app.route('/histogram', methods=['GET'])
 def histplot():
     x_string = request.args.get('x')
@@ -72,14 +76,15 @@ def histplot():
         x_values = util.string_to_list(x_string)
     except Exception as e:
         print str(e)
-        return 'Nothing to do here.'
-    response = util.hist_plot(
+        return 'Nothing to do here. He.'
+    response = make_response(util.hist_plot(
         x=x_values,
-        bins=20 if bins is None else np.int(bins),
+        bins=int(np.sqrt(len(x_values))) if bins is None else np.int(bins),
         xlabel=xlabel,
-        title=title)
+        title=title))
+    response.mimetype = 'image/png'
     return response
-"""
+
 
 
 @app.route('/function', methods=['GET'])
@@ -95,7 +100,8 @@ def plot_function():
         x_values = util.string_to_list(x_string)
     except Exception as e:
         x_values = None
-    response = util.func_plot(func, start, end, x_values, xlabel, ylabel, title)
+    response = make_response(util.func_plot(func, start, end, x_values, xlabel, ylabel, title))
+    response.mimetype = 'image/png'
     return response
 
 

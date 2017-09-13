@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import cStringIO
+import StringIO
 
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 from numpy import sin, cos, tan, arcsin, arccos, arctan, e, pi, log, exp
 ln = log
 
@@ -23,37 +25,49 @@ def string_to_list(string):
 
 
 def scatter_plot(x, y, xlabel=None, ylabel=None, title=None):
-    plt.plot(x, y, '.')
+    # Create empty figure
+    fig = Figure()
+    ax = fig.add_subplot(1, 1, 1)
+    # Plot data
+    ax.plot(x, y, '.')
     plt.title(title if title else 'Scatterplot')
     plt.xlabel(xlabel if xlabel else 'x-values')
     plt.ylabel(ylabel if ylabel else 'y-label')
-    sio = cStringIO.StringIO()
-    plt.savefig(sio, format='png')
-    plt.close()
-    return """<img src="data:image/png;base64,%s"/>""" % sio.getvalue().encode("base64").strip()
+    # Create canvas
+    canvas = FigureCanvas(fig)
+    output = StringIO.StringIO()
+    canvas.print_png(output)
+    return output.getvalue()
 
 
 def bar_plot(labels, values, xlabel=None, ylabel=None, title=None):
+    # Create empty figure
+    fig = Figure()
+    ax = fig.add_subplot(1, 1, 1)
+    # Plot data
     label_position = np.arange(len(labels))
-    plt.bar(label_position, values, color="blue", align='center', alpha=0.75)
+    ax.bar(label_position, values, color="blue", align='center', alpha=0.75)
     plt.xticks(label_position, labels)
     plt.title(title if title else 'Barplot')
     plt.xlabel(xlabel if xlabel else 'x-values')
     plt.ylabel(ylabel if ylabel else 'y-label')
-    sio = cStringIO.StringIO()
-    plt.savefig(sio, format='png')
-    plt.close()
-    return """<img src="data:image/png;base64,%s"/>""" % sio.getvalue().encode("base64").strip()
+    # Create canvas
+    canvas = FigureCanvas(fig)
+    output = StringIO.StringIO()
+    canvas.print_png(output)
+    return output.getvalue()
 
 
 def hist_plot(x, bins, xlabel=None, title=None):
-    plt.hist(x, bins=bins)
-    plt.xlabel(xlabel if xlabel else 'x-values')
-    plt.title(title if title else 'Histogram')
-    sio = cStringIO.StringIO()
-    plt.savefig(sio, format='png')
-    plt.close()
-    return """<img src="data:image/png;base64,%s"/>""" % sio.getvalue().encode("base64").strip()
+    def histogram(elements, intervals, func):
+        return [func(list(filter(lambda x: (x >= a) and (x < b), elements))) for a, b in intervals]
+    min_val, max_val = min(x), max(x)
+    step = (max_val - min_val) / bins
+    step = step * 1.05
+    lower_limits = np.arange(min_val, max_val + step, step)
+    intervals = list(zip(lower_limits[:-1], lower_limits[1:]))
+    hist_vals = histogram(x, intervals, len)
+    return bar_plot(intervals, hist_vals, xlabel, 'Frequency (Count)', title if title else 'Histogram')
 
 
 def func_plot(funcs, start=None, end=None, x=None, xlabel=None, ylabel=None, title=None):
@@ -69,10 +83,10 @@ def func_plot(funcs, start=None, end=None, x=None, xlabel=None, ylabel=None, tit
                      " ", "", "indicator", "factorial", "step",
                      "<", ">", "<=", ">=", "==", "!="]
         try:
-            naked_function = replace_string(string_func, key_words)
-            if not len(naked_function):
+            just_numbers = replace_string(string_func, key_words)
+            if not len(just_numbers):
                 return True
-            float(naked_function)
+            float(just_numbers)
             return True
         except Exception as e:
             # print str(e)
@@ -100,13 +114,18 @@ def func_plot(funcs, start=None, end=None, x=None, xlabel=None, ylabel=None, tit
     legends = list_functions
     f_list = [eval('lambda x: ' + func) for func in list_functions]
     ys = [[f(element) for element in x] for f in f_list]
+    # Create empty figure
+    fig = Figure()
+    ax = fig.add_subplot(1, 1, 1)
+    # Plot data
     for y, label in zip(ys, legends):
-        plt.plot(x, y, label=label)
+        ax.plot(x, y, label=label)
     plt.title(title if title else 'Plot')
     plt.xlabel(xlabel if xlabel else 'x-values')
     plt.ylabel(ylabel if ylabel else 'y-values')
     plt.legend()
-    sio = cStringIO.StringIO()
-    plt.savefig(sio, format='png')
-    plt.close()
-    return """<img src="data:image/png;base64,%s"/>""" % sio.getvalue().encode("base64").strip()
+    # Create canvas
+    canvas = FigureCanvas(fig)
+    output = StringIO.StringIO()
+    canvas.print_png(output)
+    return output.getvalue()
